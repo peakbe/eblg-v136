@@ -637,3 +637,45 @@ h2 {
     font-size: 11px;
     display: block;
 }
+
+/* ============================
+   LOGS LIVE STREAM PRO+
+   ============================ */
+
+.logs-live {
+    background: rgba(255,255,255,0.08);
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: monospace;
+}
+
+.log-live-entry {
+    padding: 4px 6px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    white-space: pre-wrap;
+}
+
+.log-live-ok {
+    background: rgba(0, 200, 0, 0.25);
+    color: #9f9;
+}
+
+.log-live-warn {
+    background: rgba(255, 165, 0, 0.25);
+    color: #ffb;
+}
+
+.log-live-error {
+    background: rgba(255, 0, 0, 0.25);
+    color: #f99;
+}
+
+.log-live-time {
+    opacity: 0.6;
+    font-size: 10px;
+    display: block;
+}
