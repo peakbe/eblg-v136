@@ -3,7 +3,6 @@
 // =========================
 
 import { initSonometers } from "./sonometers.js";
-import { createStaticHeatmap } from "./sonometers.js";
 
 let map = null;
 
@@ -38,7 +37,6 @@ export function initMap() {
 
         // Modules
         initSonometers(map);
-        createStaticHeatmap(map);
 
         console.log("[MAP] Carte initialisée avec succès.");
         return map;
