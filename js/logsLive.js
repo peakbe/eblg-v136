@@ -1,4 +1,29 @@
-import { PROXY } from "./config.js";
+import { import { API_BASE } from "./config.js";
+
+export async function loadLogs() {
+    const panel = document.getElementById("logs-panel");
+    if (!panel) return;
+
+    try {
+        const res = await fetch(`${API_BASE}/fids`);
+        const t0 = performance.now();
+
+        const ok = res.ok ? "OK" : "ERR";
+        const dt = Math.round(performance.now() - t0);
+
+        const div = document.createElement("div");
+        div.className = "log-entry " + (ok === "OK" ? "log-ok" : "log-error");
+        div.textContent = `${new Date().toLocaleTimeString()} FIDS → ${ok}`;
+        panel.appendChild(div);
+
+    } catch (err) {
+        const div = document.createElement("div");
+        div.className = "log-entry log-error";
+        div.textContent = `${new Date().toLocaleTimeString()} FIDS → ERR`;
+        panel.appendChild(div);
+    }
+}
+ } from "./config.js";
 
 const livePanel = document.getElementById("logs-live");
 const liveLogs = [];
@@ -27,7 +52,32 @@ function renderLiveLogs() {
 
 async function probe(name, endpoint) {
     try {
-        const res = await fetch(`${PROXY}/${endpoint}`);
+        const res = await fetch(`${import { API_BASE } from "./config.js";
+
+export async function loadLogs() {
+    const panel = document.getElementById("logs-panel");
+    if (!panel) return;
+
+    try {
+        const res = await fetch(`${API_BASE}/fids`);
+        const t0 = performance.now();
+
+        const ok = res.ok ? "OK" : "ERR";
+        const dt = Math.round(performance.now() - t0);
+
+        const div = document.createElement("div");
+        div.className = "log-entry " + (ok === "OK" ? "log-ok" : "log-error");
+        div.textContent = `${new Date().toLocaleTimeString()} FIDS → ${ok}`;
+        panel.appendChild(div);
+
+    } catch (err) {
+        const div = document.createElement("div");
+        div.className = "log-entry log-error";
+        div.textContent = `${new Date().toLocaleTimeString()} FIDS → ERR`;
+        panel.appendChild(div);
+    }
+}
+}/${endpoint}`);
         const json = await res.json();
 
         if (json.fallback) {
