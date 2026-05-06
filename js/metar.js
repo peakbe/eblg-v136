@@ -1,18 +1,11 @@
 // ======================================================
-// METAR — VERSION PRO+
+// METAR — VERSION PRO+ (HARMONISÉE AVEC RUNWAYS PRO+)
 // Chargement sécurisé, logs propres, UI robuste.
 // ======================================================
 
 import { ENDPOINTS } from "./config.js";
 import { fetchJSON, updateStatusPanel } from "./helpers.js";
-import { 
-    getRunwayFromWind, 
-    RUNWAYS, 
-    computeCrosswind, 
-    drawRunway, 
-    drawCorridor, 
-    updateRunwayPanel 
-} from "./runways.js";
+import { updateRunwayPanel, getRunwayFromWind, drawRunway, drawCorridor } from "./runways.js";
 
 // ------------------------------------------------------
 // Logging PRO+
@@ -52,8 +45,11 @@ export function updateMetarUI(data) {
     // Vérification structure CheckWX
     if (!data || !data.data || !data.data[0] || !data.data[0].raw_text) {
         el.innerText = "METAR indisponible";
-        drawRunway("UNKNOWN", window.runwayLayer);
-        drawCorridor("UNKNOWN", window.corridorLayer);
+
+        drawRunway("22", window.runwayLayer);      // fallback piste 22
+        drawCorridor("22", window.corridorLayer);
+        updateRunwayPanel("22", 0, 0, 0);
+
         return;
     }
 
@@ -63,19 +59,16 @@ export function updateMetarUI(data) {
     el.innerText = metar.raw_text;
 
     // Extraction vent
-    const windDir = metar.wind?.degrees;
-    const windSpeed = metar.wind?.speed_kts;
+    const windDir = metar.wind?.degrees ?? null;
+    const windSpeed = metar.wind?.speed_kts ?? null;
 
-    // Calcul piste
+    // Détermination piste active (gérée dans runways.js)
     const runway = getRunwayFromWind(windDir);
-    const { crosswind } = computeCrosswind(
-        windDir,
-        windSpeed,
-        RUNWAYS[runway]?.heading
-    );
 
-    updateRunwayPanel(runway, windDir, windSpeed, crosswind);
+    // Mise à jour panneau piste
+    updateRunwayPanel(runway, windDir, windSpeed);
 
+    // Dessin piste + corridor
     drawRunway(runway, window.runwayLayer);
     drawCorridor(runway, window.corridorLayer);
 }
