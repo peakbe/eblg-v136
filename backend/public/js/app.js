@@ -64,7 +64,13 @@ window.addEventListener("DOMContentLoaded", () => {
     if (defaultTab) defaultTab.click();
 
     // 7) Bouton reset map
-   
+   const resetMapBtn = document.getElementById("btn-reset-map");
+if (resetMapBtn) {
+    resetMapBtn.addEventListener("click", () => {
+        resetMapView();
+    });
+}
+
 
     // 8) Heatmap ON/OFF
     let noiseHeatmapEnabled = true;
