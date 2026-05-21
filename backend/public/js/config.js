@@ -4,5 +4,6 @@ export const ENDPOINTS = {
     metar: `${BASE_URL}/metar`,
     taf: `${BASE_URL}/taf`,
     fids: `${BASE_URL}/fids`,
-    sonometers: `${BASE_URL}/sonos`
+    sono: `${BASE_URL}/sonos`,
+    adsb: `${BASE_URL}/api/adsb`
 };
