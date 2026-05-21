@@ -1,97 +1,73 @@
 // ======================================================
-// STATUS.JS — v150 Cockpit IFR
-// Monitoring METAR / TAF / FIDS / SONO
-// Compatible Render Free Tier (cold start 6–12 sec)
+// STATUS.JS — Cockpit IFR EBLG PRO+++
+// - Vérification périodique des endpoints backend
+// - Mise à jour panneau statut (METAR / TAF / FIDS / SONO / ADS-B)
+// - Anti-HTML, anti-timeout, anti-erreurs silencieuses
 // ======================================================
 
 import { ENDPOINTS } from "./config.js";
+import { fetchJSON, updateStatusPanel } from "./helpers.js";
 
-const IS_DEV = location.hostname.includes("localhost");
-const log = (...a) => IS_DEV && console.log("[STATUS]", ...a);
-const logErr = (...a) => console.error("[STATUS ERROR]", ...a);
+// ------------------------------------------------------
+// ENDPOINTS À TESTER
+// ------------------------------------------------------
+const CHECKS = [
+    { key: "METAR", url: ENDPOINTS.metar },
+    { key: "TAF", url: ENDPOINTS.taf },
+    { key: "FIDS", url: ENDPOINTS.fids },
+    { key: "SONO", url: ENDPOINTS.sono },
+    { key: "ADSB", url: ENDPOINTS.adsb || "/api/adsb" }
+];
 
-// ======================================================
-// PUBLIC — appelé depuis app.js
-// ======================================================
+// ------------------------------------------------------
+// API PUBLIC — appelée par app.js
+// ------------------------------------------------------
 export async function checkApiStatus() {
-    log("Vérification statut API…");
-
-    const results = {
-        METAR: await ping("METAR", ENDPOINTS.metar),
-        TAF: await ping("TAF", ENDPOINTS.taf),
-        FIDS: await ping("FIDS", ENDPOINTS.fids),
-        SONO: await ping("SONO", ENDPOINTS.sonometers)
-    };
-
-    updateStatusPanel(results);
-}
-
-// ======================================================
-// PING PRO+ — timeout 12 sec (Render Free Tier)
-// ======================================================
-async function ping(name, url) {
-    const controller = new AbortController();
-
-    // Render Free Tier cold start = 6–12 sec
-    const timeout = setTimeout(() => controller.abort(), 12000);
-
-    const t0 = performance.now();
-
-    try {
-        const res = await fetch(url, { signal: controller.signal });
-        clearTimeout(timeout);
-
-        const dt = Math.round(performance.now() - t0);
-
-        if (!res.ok) {
-            logErr(`${name} → DOWN (${dt} ms)`);
-            return "DOWN";
-        }
-
-        log(`${name} → OK (${dt} ms)`);
-        return "OK";
-
-    } catch (err) {
-        clearTimeout(timeout);
-        logErr(`${name} → DOWN (timeout / erreur)`);
-        return "DOWN";
+    for (const c of CHECKS) {
+        await checkOne(c.key, c.url);
     }
 }
 
-// ======================================================
-// UI — Mise à jour du panneau statut API
-// ======================================================
-function updateStatusPanel(results) {
-    const el = document.getElementById("api-status");
-    if (!el) return;
+// ------------------------------------------------------
+// TEST D’UN ENDPOINT
+// ------------------------------------------------------
+async function checkOne(key, url) {
+    try {
+        const data = await fetchJSON(url, 5000);
 
-    el.innerHTML = `
-        <div class="status-row">
-            <span>METAR</span>
-            <span class="status-dot ${color(results.METAR)}"></span>
-        </div>
-        <div class="status-row">
-            <span>TAF</span>
-            <span class="status-dot ${color(results.TAF)}"></span>
-        </div>
-        <div class="status-row">
-            <span>FIDS</span>
-            <span class="status-dot ${color(results.FIDS)}"></span>
-        </div>
-        <div class="status-row">
-            <span>Sonomètres</span>
-            <span class="status-dot ${color(results.SONO)}"></span>
-        </div>
-    `;
-}
+        if (!data) {
+            updateStatusPanel(key, { error: true });
+            return;
+        }
 
-// ======================================================
-// Couleurs ATC
-// ======================================================
-function color(state) {
-    switch (state) {
-        case "OK": return "green";
-        case "DOWN": return "red";
-        default: return "orange";
+        // Vérification minimale selon type
+        switch (key) {
+            case "METAR":
+                if (!data.raw) return updateStatusPanel(key, { error: true });
+                break;
+
+            case "TAF":
+                if (!data.raw) return updateStatusPanel(key, { error: true });
+                break;
+
+            case "FIDS":
+                if (!Array.isArray(data.flights))
+                    return updateStatusPanel(key, { error: true });
+                break;
+
+            case "SONO":
+                if (!data.sensors) return updateStatusPanel(key, { error: true });
+                break;
+
+            case "ADSB":
+                if (!data.ac) return updateStatusPanel(key, { error: true });
+                break;
+        }
+
+        updateStatusPanel(key, { ok: true });
+
+    } catch (err) {
+        console.error(`[STATUS] Erreur ${key}`, err);
+        updateStatusPanel(key, { error: true });
     }
 }
