@@ -2,7 +2,13 @@
 // APP.JS — Cockpit IFR EBLG PRO+++
 // ======================================================
 
-import { initMap, resetMapView, toggleNoiseHeatmap, toggleNoiseZones, initDebugPanel } from "./map.js";
+import {
+    initMap,
+    resetMapView,
+    toggleNoiseHeatmap,
+    toggleNoiseZones,
+    initDebugPanel
+} from "./map.js";
 
 import { initMetar, safeLoadMetar } from "./metar.js";
 import { initTaf, safeLoadTaf } from "./taf.js";
@@ -16,10 +22,9 @@ import { startLiveLogs } from "./logsLive.js";
 // INIT GLOBAL
 // ------------------------------------------------------
 window.addEventListener("DOMContentLoaded", () => {
-
     console.log("[APP] Initialisation cockpit IFR…");
 
-    // Carte
+    // Carte + debug
     initMap();
     initDebugPanel();
 
@@ -59,12 +64,13 @@ function setupTimers() {
 // UI
 // ------------------------------------------------------
 function setupUIBindings() {
-
     // Reset carte
     const resetBtn = document.getElementById("btn-reset-map");
-    if (resetBtn) resetBtn.addEventListener("click", () => resetMapView());
+    if (resetBtn) {
+        resetBtn.addEventListener("click", () => resetMapView());
+    }
 
-    // Heatmap
+    // Heatmap bruit
     const heatmapToggle = document.getElementById("btn-heatmap");
     if (heatmapToggle) {
         heatmapToggle.addEventListener("change", e => {
@@ -72,19 +78,21 @@ function setupUIBindings() {
         });
     }
 
-    // Zones bruit
+    // Zones de bruit
     const noiseZonesBtn = document.getElementById("btn-noisezones-toggle");
     if (noiseZonesBtn) {
         noiseZonesBtn.addEventListener("click", () => toggleNoiseZones());
     }
 
-    // Onglets
+    // Onglets panneaux
     const tabs = document.querySelectorAll("[data-panel-target]");
     tabs.forEach(tab => {
         tab.addEventListener("click", () => {
             const targetId = tab.getAttribute("data-panel-target");
 
-            document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
+            document.querySelectorAll(".panel").forEach(p =>
+                p.classList.add("hidden")
+            );
             const panel = document.getElementById(targetId);
             if (panel) panel.classList.remove("hidden");
         });
